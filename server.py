@@ -3,12 +3,24 @@ import math,socket,json
 def floor(x):
     return int(math.floor(x))
 
-def hello(name):
-    return f"Hello {name}"
+def nroot(n, x):
+    return x ** (1 / n)
+
+def reverse(s):
+    return s[::-1]
+
+def validAnagram(str1, str2):
+    return sorted(str1) == sorted(str2)
+
+def sort(strArr):
+    return sorted(strArr)
 
 function_hashmap = {
     "floor": floor,
-    "hello": hello,
+    "nroot": nroot,
+    "reverse": reverse,
+    "validAnagram": validAnagram,
+    "sort": sort
 }
 
 def process_request(request_json):
@@ -36,9 +48,9 @@ def process_request(request_json):
 
 def start_server():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
-        server_socket.bind(("localhost", 12345))
+        server_socket.bind(("localhost", 8000))
         server_socket.listen()
-        print("server listening on localhost:12345")
+        print("server listening on localhost:8000")
         
         while True:
             connection, client_address = server_socket.accept()

@@ -6,43 +6,63 @@ const read_InputValue = readline.createInterface({
 });
 
 const client = new net.Socket();
-const port = 12345;
+const port = 8000;
 const host = "localhost";
+
+const functionInstructions = {
+  floor: "Enter a number including the decimal point. Example: 5.36515",
+  nroot: "Enter numbers in an array. Example: [4,6]",
+  reverse: `Enter a string. Example: "testinput"`,
+  validAnagram:
+    `Enter two strings in an array. Example: ["testinput","inputtest"]`,
+  sort: `Enter strings in an array. Example: ["test"]`,
+};
 
 function promptForRequest() {
   read_InputValue.question(
     "which select functions?\n" +
-      "[floor]: truncates the decimal point and returns an integer.\n" +
-      "[hello]: add 'hello' to the beginning of the input string and returns it.\n",
+      "options: floor, nroot, reverse, validAnagram, sort.\n",
     function (functionName) {
-      if (functionName !== "hello" && functionName !== "floor") {
+      if (!functionInstructions.hasOwnProperty(functionName)) {
         console.log("error: function does not exist.");
         client.destroy();
         read_InputValue.close();
         return;
       }
 
-      read_InputValue.question(
-        "'hello' is enter a string\n" +
-          "'floor' is enter a number including float.\n",
-        function (param) {
-          let params = functionName === "floor" ? parseFloat(param) : param;
-          let request = {
-            method: functionName,
-            params: params,
-            param_types: typeof params,
-            id: 1,
-          };
+      const instruction = functionInstructions[functionName];
+      console.log(instruction);
 
-          client.connect(port, host, () => {
-            console.log("connected to server on " + host + ":" + port);
+      read_InputValue.question("enter the parameters: ", function (param) {
+        let params;
 
-            client.write(JSON.stringify(request));
-          });
-
-          read_InputValue.close();
+        switch (functionName) {
+          case "floor":
+            params = parseFloat(param);
+            break;
+          case "nroot":
+          case "validAnagram":
+          case "sort":
+            params = JSON.parse(param);
+            break;
+          default:
+            params = param;
         }
-      );
+
+        let request = {
+          method: functionName,
+          params: params,
+          param_types: typeof params,
+          id: 1,
+        };
+
+        client.connect(port, host, () => {
+          console.log("connected to server on " + host + ":" + port);
+          client.write(JSON.stringify(request));
+        });
+
+        read_InputValue.close();
+      });
     }
   );
 }
